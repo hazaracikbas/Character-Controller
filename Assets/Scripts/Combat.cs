@@ -6,7 +6,7 @@ public class Combat : MonoBehaviour
 {
     private Animator animator;
     private bool canAttack = true;
-    private float attackCooldown = 0.5f;
+    private float attackCooldown = 0.75f;
 
     private void Start()
     {
