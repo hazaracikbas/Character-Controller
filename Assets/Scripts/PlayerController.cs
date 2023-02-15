@@ -1,6 +1,7 @@
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,12 +20,20 @@ public class PlayerController : MonoBehaviour
     private Vector3 velocity;
     private new Transform camera;
 
+    private StateMachine movementSM;
+    private IdleState idle;
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
         camera = Camera.main.transform;
         animator= GetComponent<Animator>();
         speed = runSpeed;
+    }
+
+    private void Start()
+    {
+        movementSM.Initialize(idle);
     }
 
     private void Update()
