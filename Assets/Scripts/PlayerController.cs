@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -16,11 +17,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 10;
 
     private CharacterController controller;
+    private PlayerInput input;
     private Animator animator;
     private Vector3 velocity;
     private new Transform camera;
 
-    private StateMachine movementSM;
+    private StateMachine stateMachine;
     private IdleState idle;
 
     private void Awake()
@@ -28,12 +30,13 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         camera = Camera.main.transform;
         animator= GetComponent<Animator>();
+        input= GetComponent<PlayerInput>();
         speed = runSpeed;
     }
 
     private void Start()
     {
-        movementSM.Initialize(idle);
+        stateMachine.Initialize(idle);
     }
 
     private void Update()

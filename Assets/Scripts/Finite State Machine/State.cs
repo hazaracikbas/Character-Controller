@@ -15,6 +15,6 @@ public class State
     }
     public virtual void Enter() { }
     public virtual void HandleInput() { }
-    public virtual void Update() { }
+    public virtual void StateUpdate() { }
     public virtual void Exit() { }
 }
