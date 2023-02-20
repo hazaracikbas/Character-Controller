@@ -1,98 +1,164 @@
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    #region Variables
     private float speed;
-    private float gravity = -9.81f;
-    [SerializeField] private float runSpeed = 4;
-    [SerializeField] private float sprintSpeed = 6;
-    [SerializeField] private float jumpHeight = 4;
-    [SerializeField] private float rotationSpeed = 10;
+    public float Speed
+    {
+        get { return speed; }
+        set { speed = value; }
+    }
 
-    private CharacterController controller;
-    private PlayerInput input;
-    private Animator animator;
-    private Vector3 velocity;
-    private new Transform camera;
+    private float gravity = -9.81f;
+    public float Gravity
+    {
+        get { return gravity; }
+        set { gravity = value; }
+    }
+
+    [SerializeField] private float jumpHeight;
+    public float JumpHeight
+    {
+        get { return jumpHeight; }
+        set { jumpHeight = value; }
+    }
+
+    [SerializeField] private float rotationSpeed;
+    public float RotationSpeed
+    {
+        get { return rotationSpeed; }
+        set { rotationSpeed = value; }
+    }
+
+    [SerializeField] private float runSpeed;
+    public float RunSpeed
+    {
+        get { return runSpeed; }
+        set { runSpeed = value; }
+    }
+
+    [SerializeField] private float sprintSpeed;
+    public float SprintSpeed
+    {
+        get { return sprintSpeed; }
+        set { sprintSpeed = value; }
+    }
+    #endregion
+
+    [HideInInspector] public CharacterController controller;
+    [HideInInspector] public PlayerInput input = null;
+    [HideInInspector] public Animator animator;
+    [HideInInspector] public Vector3 velocity;
+    [HideInInspector] public new Transform camera;
+
+    private Vector2 moveInput;
+    private InputAction movement;
+    private InputAction jump;
+    private InputAction sprint;
+    private InputAction dodge;
 
     private StateMachine stateMachine;
     private IdleState idle;
+    private RunState running;
+    private JumpState jumping;
 
     private void Awake()
     {
-        controller = GetComponent<CharacterController>();
         camera = Camera.main.transform;
-        animator= GetComponent<Animator>();
-        input= GetComponent<PlayerInput>();
-        speed = runSpeed;
-    }
+        controller = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+        input = new PlayerInput();
 
+        movement = input.Player.Movement;
+        jump = input.Player.Jump;
+        sprint = input.Player.Sprint;
+        dodge = input.Player.DodgeRoll;
+
+    }
     private void Start()
     {
-        stateMachine.Initialize(idle);
-    }
+        speed = runSpeed;
 
+        stateMachine = new StateMachine();
+        idle = new IdleState(this, stateMachine);
+        running = new RunState(this, stateMachine);
+        jumping = new JumpState(this, stateMachine);
+
+        stateMachine.Initialize(idle);
+
+        movement.performed += OnMovementPerformed;
+        movement.canceled += OnMovementCanceled;
+        //input.Player.Movement.performed += ctx => moveInput = input.Player.Movement.ReadValue<Vector2>();
+        jump.performed += Jump;
+        sprint.performed += Sprint;
+    }
     private void Update()
     {
-        PlayerMovement();
-        //AnimationParams();
-
-        if (!controller.isGrounded) Debug.Log("Not grounded.");
+        Movement();
     }
 
-    private void PlayerMovement()
+    private void OnEnable()
     {
-        Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized;
+        input.Player.Enable();
+    }
+
+    private void OnDisable()
+    {
+        input.Player.Disable();
+    }
+
+    private void OnMovementPerformed(InputAction.CallbackContext context)
+    {
+        moveInput = movement.ReadValue<Vector2>();
+    }
+    private void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+        moveInput = Vector2.zero;
+    }
+    private void Movement()
+    {
+        Vector3 direction = new Vector3(moveInput.x, 0, moveInput.y).normalized;
         direction = Quaternion.Euler(0, camera.eulerAngles.y, 0) * direction;
 
-        animator.SetFloat("vertical", direction.magnitude * speed);
-
-        //Rotates the character to the move direction
+        // Rotates the character to the move direction
         if (direction.magnitude > 0.1f)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * rotationSpeed);
         }
 
-        velocity.y += gravity * Time.deltaTime;
         velocity.x = direction.x * speed;
+        velocity.y += gravity * Time.deltaTime;
         velocity.z = direction.z * speed;
 
         controller.Move(velocity * Time.deltaTime);
 
-        Jump();
-        Sprint();
-
-        //Debug.Log(direction.magnitude * speed);
+        animator.SetFloat("vertical", direction.magnitude * speed);
     }
-
-    private void Jump()
+    private void Jump(InputAction.CallbackContext context)
     {
-        if (Input.GetButtonDown("Jump") && controller.isGrounded)
+        if (controller.isGrounded)
         {
-            Debug.Log("Jump!");
-            //velocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravity);
             velocity.y = jumpHeight;
             animator.SetTrigger("Jump");
         }
     }
-
-    private void Sprint()
+    private void Sprint(InputAction.CallbackContext context)
     {
-        if (Input.GetKey(KeyCode.LeftShift) && controller.isGrounded)
+        if (controller.isGrounded)
         {
             speed = sprintSpeed;
         }
         else
         {
             speed = runSpeed;
-
         }
     }
 }

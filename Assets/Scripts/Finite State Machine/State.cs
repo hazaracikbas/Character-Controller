@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class State
+public abstract class State
 {
-    public PlayerController player;
-    public StateMachine stateMachine;
-
+    protected PlayerController player;
+    protected StateMachine stateMachine;
     public State(PlayerController player, StateMachine stateMachine)
     {
         this.player = player;
@@ -15,6 +14,7 @@ public class State
     }
     public virtual void Enter() { }
     public virtual void HandleInput() { }
-    public virtual void StateUpdate() { }
+    public virtual void PhysicsUpdate() { }
+    public virtual void LogicUpdate() { }
     public virtual void Exit() { }
 }
