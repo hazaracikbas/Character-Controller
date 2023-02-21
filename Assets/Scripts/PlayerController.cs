@@ -94,11 +94,6 @@ public class PlayerController : MonoBehaviour
 
         stateMachine.Initialize(idle);
 
-        movement.performed += OnMovementPerformed;
-        movement.canceled += OnMovementCanceled;
-        //input.Player.Movement.performed += ctx => moveInput = input.Player.Movement.ReadValue<Vector2>();
-        jump.performed += Jump;
-        sprint.performed += Sprint;
     }
     private void Update()
     {
@@ -107,6 +102,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        movement.performed += OnMovementPerformed;
+        movement.canceled += OnMovementCanceled;
+        jump.performed += Jump;
+        sprint.performed += OnSprintPerformed;
+        sprint.canceled += OnSprintCanceled;
+
         input.Player.Enable();
     }
 
@@ -115,20 +116,13 @@ public class PlayerController : MonoBehaviour
         input.Player.Disable();
     }
 
-    private void OnMovementPerformed(InputAction.CallbackContext context)
-    {
-        moveInput = movement.ReadValue<Vector2>();
-    }
-    private void OnMovementCanceled(InputAction.CallbackContext context)
-    {
-        moveInput = Vector2.zero;
-    }
     private void Movement()
     {
         Vector3 direction = new Vector3(moveInput.x, 0, moveInput.y).normalized;
+        
         direction = Quaternion.Euler(0, camera.eulerAngles.y, 0) * direction;
 
-        // Rotates the character to the move direction
+        // Sets camera forward as forward direction
         if (direction.magnitude > 0.1f)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * rotationSpeed);
@@ -142,24 +136,33 @@ public class PlayerController : MonoBehaviour
 
         animator.SetFloat("vertical", direction.magnitude * speed);
     }
+
     private void Jump(InputAction.CallbackContext context)
     {
         if (controller.isGrounded)
         {
+            Debug.Log("Jump");
             velocity.y = jumpHeight;
             animator.SetTrigger("Jump");
         }
     }
-    private void Sprint(InputAction.CallbackContext context)
+
+    private void OnMovementPerformed(InputAction.CallbackContext context)
     {
-        if (controller.isGrounded)
-        {
-            speed = sprintSpeed;
-        }
-        else
-        {
-            speed = runSpeed;
-        }
+        moveInput = context.ReadValue<Vector2>();
+    }
+    private void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+        moveInput = Vector2.zero;
+    }
+
+    private void OnSprintPerformed(InputAction.CallbackContext context)
+    {
+        speed = sprintSpeed;
+    }
+    private void OnSprintCanceled(InputAction.CallbackContext context)
+    {
+        speed = runSpeed;
     }
 }
 
