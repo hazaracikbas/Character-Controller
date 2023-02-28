@@ -56,8 +56,8 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public PlayerInput input;
     [HideInInspector] public Animator animator;
-    [HideInInspector] public Vector3 velocity;
     [HideInInspector] public new Transform camera;
+    [HideInInspector] public Vector3 velocity;
 
     private Vector2 moveInput;
     private InputAction movement;
@@ -69,6 +69,11 @@ public class PlayerController : MonoBehaviour
     private IdleState idle;
     private RunState running;
     private JumpState jumping;
+
+    private bool isJumping;
+    private bool isMoving;
+    private bool isFalling;
+    private bool isDodging;
 
     private void Awake()
     {
@@ -98,13 +103,15 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         Movement();
+
+        if (controller.isGrounded) { isJumping = false; }
     }
 
     private void OnEnable()
     {
         movement.performed += OnMovementPerformed;
         movement.canceled += OnMovementCanceled;
-        jump.performed += ctx => { OnJump(ctx); };
+        jump.performed += OnJump;
         sprint.performed += OnSprintPerformed;
         sprint.canceled += OnSprintCanceled;
 
@@ -139,13 +146,13 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
-        if (input.Player.Jump.triggered && controller.isGrounded)
+        if (!isJumping)
         {
             velocity.y = jumpHeight;
             animator.SetTrigger("Jump");
+            isJumping = true;
         }
     }
-
     private void OnMovementPerformed(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();

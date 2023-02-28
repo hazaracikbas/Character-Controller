@@ -10,4 +10,30 @@ public class IdleState : State
     this.stateMachine = stateMachine;
   }
 
+    public override void Enter()
+    {
+        base.Enter();
+
+        if (this.stateMachine != null)
+        {
+            stateMachine.ChangeState(this);
+        }
+    }
+
+    public override void LogicUpdate()
+    {
+        base.LogicUpdate();
+
+
+    }
+
+    public override void PhysicsUpdate()
+    {
+        base.PhysicsUpdate();
+    }
+
+    public override void Exit() 
+    { 
+        base.Exit();
+    }
 }
