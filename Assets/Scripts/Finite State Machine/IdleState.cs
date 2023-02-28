@@ -25,6 +25,7 @@ public class IdleState : State
         base.LogicUpdate();
 
 
+
     }
 
     public override void PhysicsUpdate()

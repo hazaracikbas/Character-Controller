@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    #region Variables
+#region Variables
     private float speed;
     public float Speed
     {
@@ -51,24 +51,27 @@ public class PlayerController : MonoBehaviour
         get { return sprintSpeed; }
         set { sprintSpeed = value; }
     }
-    #endregion
+#endregion
 
+#region Components
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public PlayerInput input;
     [HideInInspector] public Animator animator;
     [HideInInspector] public new Transform camera;
+#endregion
+
     [HideInInspector] public Vector3 velocity;
 
-    private Vector2 moveInput;
-    private InputAction movement;
-    private InputAction jump;
-    private InputAction sprint;
-    private InputAction dodge;
+    public StateMachine stateMachine;
+    public IdleState idle;
+    public RunState running;
+    public JumpState jumping;
 
-    private StateMachine stateMachine;
-    private IdleState idle;
-    private RunState running;
-    private JumpState jumping;
+    public Vector2 moveInput;
+    public InputAction movement;
+    public InputAction jump;
+    public InputAction sprint;
+    public InputAction dodge;
 
     private bool isJumping;
     private bool isMoving;
