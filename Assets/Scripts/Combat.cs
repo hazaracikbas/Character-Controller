@@ -15,12 +15,12 @@ public class Combat : MonoBehaviour
 
     private void Update()
     {
-        Attack();
+        
     }
 
     private void Attack()
     {
-        if (Input.GetMouseButtonDown(0) && canAttack)
+        if (canAttack)
         {
             animator.SetTrigger("Attack");
             canAttack = false;

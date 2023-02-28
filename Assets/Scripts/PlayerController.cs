@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     [HideInInspector] public CharacterController controller;
-    [HideInInspector] public PlayerInput input = null;
+    [HideInInspector] public PlayerInput input;
     [HideInInspector] public Animator animator;
     [HideInInspector] public Vector3 velocity;
     [HideInInspector] public new Transform camera;
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
         movement = input.Player.Movement;
         jump = input.Player.Jump;
         sprint = input.Player.Sprint;
-        dodge = input.Player.DodgeRoll;
+        dodge = input.Player.Dodge;
 
     }
     private void Start()
@@ -104,7 +104,7 @@ public class PlayerController : MonoBehaviour
     {
         movement.performed += OnMovementPerformed;
         movement.canceled += OnMovementCanceled;
-        jump.performed += Jump;
+        jump.performed += ctx => { OnJump(ctx); };
         sprint.performed += OnSprintPerformed;
         sprint.canceled += OnSprintCanceled;
 
@@ -129,19 +129,18 @@ public class PlayerController : MonoBehaviour
         }
 
         velocity.x = direction.x * speed;
-        velocity.y += gravity * Time.deltaTime;
         velocity.z = direction.z * speed;
+        velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
 
         animator.SetFloat("vertical", direction.magnitude * speed);
     }
 
-    private void Jump(InputAction.CallbackContext context)
+    private void OnJump(InputAction.CallbackContext context)
     {
-        if (controller.isGrounded)
+        if (input.Player.Jump.triggered && controller.isGrounded)
         {
-            Debug.Log("Jump");
             velocity.y = jumpHeight;
             animator.SetTrigger("Jump");
         }
