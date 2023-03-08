@@ -14,10 +14,6 @@ public class IdleState : State
     {
         base.Enter();
 
-        if (this.stateMachine != null)
-        {
-            stateMachine.ChangeState(this);
-        }
     }
 
     public override void LogicUpdate()
