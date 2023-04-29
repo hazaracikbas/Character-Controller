@@ -106,8 +106,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         Movement();
-
-        if (controller.isGrounded) { isJumping = false; }
+        GroundedCheck();
     }
 
     private void OnEnable()
@@ -172,6 +171,12 @@ public class PlayerController : MonoBehaviour
     private void OnSprintCanceled(InputAction.CallbackContext context)
     {
         speed = runSpeed;
+    }
+
+    private void GroundedCheck()
+    {
+        if (controller.isGrounded) { isJumping = false; }
+
     }
 }
 
